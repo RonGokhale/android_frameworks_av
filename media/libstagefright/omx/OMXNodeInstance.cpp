@@ -90,6 +90,12 @@ static const OMX_U32 kPortIndexOutput = 1;
 // TRICKY: this is needed so formatting macros expand before substitution
 #define WITH_STATS(fmt, ...) WITH_STATS_WRAPPER(fmt, ##__VA_ARGS__)
 
+#ifdef METADATA_CAMERA_SOURCE
+#define METADATA_TYPE kMetadataBufferTypeCameraSource
+#else
+#define METADATA_TYPE kMetadataBufferTypeNativeHandleSource
+#endif
+
 namespace android {
 
 struct BufferMeta {
@@ -923,7 +929,7 @@ status_t OMXNodeInstance::updateNativeHandleInMeta(
     sp<ABuffer> data = bufferMeta->getBuffer(
             header, portIndex == kPortIndexInput /* backup */, false /* limit */);
     bufferMeta->setNativeHandle(nativeHandle);
-    if (mMetadataType[portIndex] == kMetadataBufferTypeNativeHandleSource
+    if (mMetadataType[portIndex] == METADATA_TYPE
             && data->capacity() >= sizeof(VideoNativeHandleMetadata)) {
         VideoNativeHandleMetadata &metadata = *(VideoNativeHandleMetadata *)(data->data());
         metadata.eType = mMetadataType[portIndex];

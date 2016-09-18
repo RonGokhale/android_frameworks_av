@@ -130,6 +130,10 @@ ifneq (,$(filter userdebug eng,$(TARGET_BUILD_VARIANT)))
 LOCAL_CFLAGS += -DENABLE_STAGEFRIGHT_EXPERIMENTS
 endif
 
+ifeq ($(TARGET_NEED_METADATA_CAMERA_SOURCE),true)
+LOCAL_CFLAGS += -DMETADATA_CAMERA_SOURCE
+endif
+
 LOCAL_CLANG := true
 LOCAL_SANITIZE := unsigned-integer-overflow signed-integer-overflow
 

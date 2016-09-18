@@ -55,6 +55,12 @@
 #include "include/DataConverter.h"
 #include "omx/OMXUtils.h"
 
+#ifdef METADATA_CAMERA_SOURCE
+#define METADATA_TYPE kMetadataBufferTypeCameraSource
+#else
+#define METADATA_TYPE kMetadataBufferTypeNativeHandleSource
+#endif
+
 namespace android {
 
 enum {
@@ -801,7 +807,7 @@ status_t ACodec::allocateBuffersOnPort(OMX_U32 portIndex) {
             size_t bufSize = def.nBufferSize;
             if (type == kMetadataBufferTypeANWBuffer) {
                 bufSize = sizeof(VideoNativeMetadata);
-            } else if (type == kMetadataBufferTypeNativeHandleSource) {
+            } else if (type == METADATA_TYPE) {
                 bufSize = sizeof(VideoNativeHandleMetadata);
             }
 
@@ -1812,7 +1818,7 @@ status_t ACodec::configureCodec(
             && msg->findInt32("android._store-metadata-in-buffers-output", &storeMeta)
             && storeMeta != 0);
 
-        mOutputMetadataType = kMetadataBufferTypeNativeHandleSource;
+        mOutputMetadataType = METADATA_TYPE;
         err = mOMX->storeMetaDataInBuffers(mNode, kPortIndexOutput, enable, &mOutputMetadataType);
         if (err != OK) {
             ALOGE("[%s] storeMetaDataInBuffers (output) failed w/ err %d",
@@ -5802,7 +5808,7 @@ void ACodec::BaseState::onInputBufferFilled(const sp<AMessage> &msg) {
                 case kMetadataBufferTypeInvalid:
                     break;
 #ifndef OMX_ANDROID_COMPILE_AS_32BIT_ON_64BIT_PLATFORMS
-                case kMetadataBufferTypeNativeHandleSource:
+                case METADATA_TYPE:
                     if (info->mCodecData->size() >= sizeof(VideoNativeHandleMetadata)) {
                         VideoNativeHandleMetadata *vnhmd =
                             (VideoNativeHandleMetadata*)info->mCodecData->base();
@@ -6032,7 +6038,7 @@ bool ACodec::BaseState::onOMXFillBufferDone(
                 VideoNativeHandleMetadata &nativeMeta =
                     *(VideoNativeHandleMetadata *)info->mData->data();
                 if (info->mData->size() >= sizeof(nativeMeta)
-                        && nativeMeta.eType == kMetadataBufferTypeNativeHandleSource) {
+                        && nativeMeta.eType == METADATA_TYPE) {
 #ifdef OMX_ANDROID_COMPILE_AS_32BIT_ON_64BIT_PLATFORMS
                     // handle is only valid on 32-bit/mediaserver process
                     handle = NULL;

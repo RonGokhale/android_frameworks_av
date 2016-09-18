@@ -31,6 +31,10 @@ LOCAL_SHARED_LIBRARIES :=               \
         libstagefright_foundation       \
         libdl
 
+ifeq ($(TARGET_NEED_METADATA_CAMERA_SOURCE),true)
+LOCAL_CFLAGS += -DMETADATA_CAMERA_SOURCE
+endif
+
 LOCAL_MODULE:= libstagefright_omx
 LOCAL_CFLAGS += -Werror -Wall
 LOCAL_CLANG := true
